@@ -111,6 +111,7 @@ export async function buildPost(book: BookRow): Promise<BuiltPost> {
   if (workKey && !book.work_key) setWorkKey(book.slug, workKey);
 
   const link = amazonLink(book.title, book.author);
+  const linkPdf = amazonLink(book.title, book.author, "PDF");
 
   const date = new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
   const ficha = [
@@ -141,7 +142,7 @@ export async function buildPost(book: BookRow): Promise<BuiltPost> {
       `💡 *Curiosidades*\n${data.curiosidades.map((c) => `• ${esc(c)}`).join("\n")}`,
     data.frase && `❝ _${esc(data.frase)}_ ❞`,
     data.paraQuem && `🎯 *Para quem é:* ${esc(data.paraQuem)}`,
-    `🛒 [Comprar na Amazon](${link})`,
+    `🛒 [Comprar na Amazon](${link})\n📄 [Buscar versão PDF](${linkPdf})`,
   ]
     .filter(Boolean)
     .join("\n\n");
