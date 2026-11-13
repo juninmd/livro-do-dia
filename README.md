@@ -1,5 +1,9 @@
 # 📚 livro-do-dia
 
+<p align="center">
+  <img src="docs/readme/hero.png" alt="Banner ilustrativo do livro-do-dia (mockup com dados fictícios)" width="100%">
+</p>
+
 Um livro por dia no Telegram — capa, sinopse, resumo em tópicos, curiosidades e link de compra.
 
 O bot mantém um catálogo em SQLite, gira os títulos para não repetir, amplia o catálogo sozinho com livros validados em APIs públicas e escreve a indicação com uma IA. O nicho é fixo: mentalidade, disciplina, hábitos, dinheiro, estoicismo e negócios — o espírito de *Nada Pode Me Ferir* e *Os Segredos da Mente Milionária*.
@@ -178,6 +182,24 @@ bun run preview
 ```
 
 `bun run lint` usa Biome 2.5.2 e roda com `--write`: ele corrige os arquivos em vez de só reportar. Não existe workflow de CI em `.github/workflows/`.
+
+## Imagens
+
+> [!NOTE]
+> **Mockups ilustrativos.** As telas abaixo foram geradas em HTML com dados fictícios (Playwright) e não são capturas de uma instalação real.
+
+<p align="center">
+  <img src="docs/readme/post.png" alt="O post do dia — mockup ilustrativo com dados fictícios" width="100%">
+  <br>
+  <sub>O post do dia — dados fictícios.</sub>
+</p>
+
+<p align="center">
+  <img src="docs/readme/rotation.png" alt="Rotação do catálogo — mockup ilustrativo com dados fictícios" width="100%">
+  <br>
+  <sub>Rotação do catálogo — dados fictícios.</sub>
+</p>
+
 
 ## Limitações
 
