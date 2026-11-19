@@ -72,16 +72,20 @@ async function call(method: string, body: Record<string, unknown>): Promise<bool
 
 const stripMarkdown = (s: string) => s.replace(/[*_`[\]]/g, "");
 
-function split(text: string, max: number): string[] {
+/** Quebra por linha em pedaços de até `max`; uma linha maior que `max` é cortada ao meio, nunca vira pedaço vazio ou grande demais. */
+export function split(text: string, max: number): string[] {
   if (text.length <= max) return [text];
   const out: string[] = [];
   let buf = "";
-  for (const line of text.split("\n")) {
-    if (buf.length + line.length + 1 > max) {
-      out.push(buf);
-      buf = "";
+  for (const raw of text.split("\n")) {
+    for (let i = 0; i === 0 || i < raw.length; i += max - 1) {
+      const line = raw.slice(i, i + max - 1);
+      if (buf && buf.length + line.length + 1 > max) {
+        out.push(buf);
+        buf = "";
+      }
+      buf += `${line}\n`;
     }
-    buf += `${line}\n`;
   }
   if (buf) out.push(buf);
   return out;
