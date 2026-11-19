@@ -173,15 +173,16 @@ O bot degrada em vez de quebrar:
 
 ## Testes
 
-Não há suíte de testes no repositório — `package.json` não define script `test`. As verificações possíveis são:
+Os testes usam o runner do Bun (`bun test`) e ficam ao lado do código (`src/*.test.ts`). Hoje cobrem a divisão de mensagens do Telegram (`split`).
 
 ```bash
+bun run test
 bun run typecheck
-bun run lint
+bunx biome check .    # só reporta, não escreve
 bun run preview
 ```
 
-`bun run lint` usa Biome 2.5.2 e roda com `--write`: ele corrige os arquivos em vez de só reportar. Não existe workflow de CI em `.github/workflows/`.
+`bun run lint` usa Biome 2.5.2 e roda com `--write`: ele corrige os arquivos em vez de só reportar. O CI (`.github/workflows/ci.yml`) roda `bun run typecheck`, `bunx biome check .` (sem escrever) e `bun run test`.
 
 ## Imagens
 

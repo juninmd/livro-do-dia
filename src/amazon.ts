@@ -5,11 +5,7 @@ import { env } from "./config/env.ts";
  * ISBN: ASIN muda por edição e o ISBN que temos costuma ser o da edição em
  * inglês, que não acha o livro na loja brasileira.
  */
-export function amazonLink(
-  title: string,
-  author: string,
-  formato = "",
-): string {
+export function amazonLink(title: string, author: string, formato = ""): string {
   const url = new URL("https://www.amazon.com.br/s");
   url.searchParams.set("k", [title, author, formato].filter(Boolean).join(" "));
   url.searchParams.set("i", "stripbooks");

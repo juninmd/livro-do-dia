@@ -10,6 +10,7 @@
     "post": "bun run src/index.ts --post",
     "preview": "bun run src/index.ts --preview",
     "typecheck": "tsc --noEmit",
+    "test": "bun test src",
     "lint": "biome check --write ."
   },
   "dependencies": {
