@@ -172,13 +172,19 @@ export async function postDaily(dryRun = false): Promise<void> {
     return;
   }
 
+  let delivered: boolean;
   if (post.cover) {
-    await sendTelegramPhoto(post.cover, post.caption);
+    delivered = await sendTelegramPhoto(post.cover, post.caption);
     if (post.rest) await sendTelegram(post.rest);
   } else {
-    await sendTelegram(post.full);
+    delivered = await sendTelegram(post.full);
   }
 
+  // não consome o livro da rotação se nenhum chat recebeu o post
+  if (!delivered) {
+    console.error(`[post] falha ao entregar no Telegram — ${book.title} segue na fila`);
+    return;
+  }
   markPosted(book.slug);
   console.log(`[post] publicado: ${book.title}`);
 }

@@ -5,48 +5,70 @@ const api = (method: string) =>
 
 const configured = () => Boolean(env.telegramToken && env.telegramChatIds.length);
 
-/** Envia texto (Markdown) para todos os chats. Cai para texto puro se o Markdown for rejeitado. */
-export async function sendTelegram(text: string): Promise<void> {
-  if (!configured())
-    return console.log(`[telegram] não configurado — post:\n\n${text}\n`);
-  for (const chatId of env.telegramChatIds) {
-    for (const chunk of split(text, 3800)) {
-      const ok = await call("sendMessage", {
+/** Envia texto (Markdown) a um chat; cai para texto puro se o Markdown for rejeitado. */
+async function sendText(chatId: string, text: string): Promise<boolean> {
+  let delivered = true;
+  for (const chunk of split(text, 3800)) {
+    const ok =
+      (await call("sendMessage", {
         chat_id: chatId,
         text: chunk,
         parse_mode: "Markdown",
         disable_web_page_preview: false,
-      });
-      if (!ok) {
-        await call("sendMessage", {
-          chat_id: chatId,
-          text: stripMarkdown(chunk),
-          disable_web_page_preview: false,
-        });
-      }
-    }
+      })) ||
+      (await call("sendMessage", {
+        chat_id: chatId,
+        text: stripMarkdown(chunk),
+        disable_web_page_preview: false,
+      }));
+    if (!ok) delivered = false;
   }
+  return delivered;
+}
+
+/**
+ * Envia texto para todos os chats. Retorna true se ao menos um chat recebeu
+ * tudo (ou se o Telegram não está configurado e o post só foi logado).
+ */
+export async function sendTelegram(text: string): Promise<boolean> {
+  if (!configured()) {
+    console.log(`[telegram] não configurado — post:\n\n${text}\n`);
+    return true;
+  }
+  let any = false;
+  for (const chatId of env.telegramChatIds) {
+    if (await sendText(chatId, text)) any = true;
+  }
+  return any;
 }
 
 /**
  * Envia a capa com legenda. Se a foto falhar (URL bloqueada/quebrada) ou o
- * Markdown for inválido, degrada para texto — nunca deixa o post no chão.
+ * Markdown for inválido, degrada para texto só naquele chat — nunca deixa o
+ * post no chão nem duplica em chats que já receberam a foto.
+ * Retorna true se ao menos um chat recebeu o post.
  */
-export async function sendTelegramPhoto(photo: string, caption: string): Promise<void> {
+export async function sendTelegramPhoto(
+  photo: string,
+  caption: string,
+): Promise<boolean> {
   if (!configured()) {
     console.log(`[telegram] não configurado — capa: ${photo}\n\n${caption}\n`);
-    return;
+    return true;
   }
   const cap = caption.slice(0, 1024);
+  let any = false;
   for (const chatId of env.telegramChatIds) {
     const base = { chat_id: chatId, photo };
     let ok = await call("sendPhoto", { ...base, caption: cap, parse_mode: "Markdown" });
     if (!ok) ok = await call("sendPhoto", { ...base, caption: stripMarkdown(cap) });
     if (!ok) {
       console.error("[telegram] sendPhoto falhou — enviando só texto");
-      await sendTelegram(caption);
+      ok = await sendText(chatId, caption);
     }
+    if (ok) any = true;
   }
+  return any;
 }
 
 async function call(method: string, body: Record<string, unknown>): Promise<boolean> {
