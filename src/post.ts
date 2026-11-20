@@ -8,7 +8,7 @@ import {
   workKeyOf,
 } from "./books.ts";
 import { type BookRow, markPosted, nextBook, setWorkKey } from "./db.ts";
-import { sendTelegram, sendTelegramPhoto } from "./telegram.ts";
+import { deliverPost } from "./deliver.ts";
 
 const SYSTEM = `Você é um curador de livros brasileiro que escreve indicações diárias no Telegram.
 Estilo: direto, motivador, sem enrolação, português do Brasil.
@@ -172,13 +172,7 @@ export async function postDaily(dryRun = false): Promise<void> {
     return;
   }
 
-  let delivered: boolean;
-  if (post.cover) {
-    delivered = await sendTelegramPhoto(post.cover, post.caption);
-    if (post.rest) await sendTelegram(post.rest);
-  } else {
-    delivered = await sendTelegram(post.full);
-  }
+  const delivered = await deliverPost(post);
 
   // não consome o livro da rotação se nenhum chat recebeu o post
   if (!delivered) {
