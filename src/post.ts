@@ -8,7 +8,7 @@ import {
   workKeyOf,
 } from "./books.ts";
 import { type BookRow, markPosted, nextBook, setWorkKey } from "./db.ts";
-import { deliverPost } from "./deliver.ts";
+import { deliverPost, layoutPost } from "./deliver.ts";
 
 const SYSTEM = `Você é um curador de livros brasileiro que escreve indicações diárias no Telegram.
 Estilo: direto, motivador, sem enrolação, português do Brasil.
@@ -129,7 +129,6 @@ export async function buildPost(book: BookRow): Promise<BuiltPost> {
     `*${esc(book.title)}*`,
     `✍️ ${esc(meta?.authors || book.author)}`,
     ficha ? `_${esc(ficha)}_` : "",
-    data.tagline ? `\n💥 ${esc(data.tagline)}` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -147,13 +146,8 @@ export async function buildPost(book: BookRow): Promise<BuiltPost> {
     .filter(Boolean)
     .join("\n\n");
 
-  const full = `${header}\n\n${sections}`;
-  return {
-    cover,
-    caption: full.length <= 1024 ? full : header,
-    full,
-    rest: full.length <= 1024 ? "" : sections,
-  };
+  const tagline = data.tagline ? `\n💥 ${esc(data.tagline)}` : "";
+  return { cover, ...layoutPost(header, tagline, sections) };
 }
 
 /** Escolhe o livro do dia, monta e publica no Telegram. */

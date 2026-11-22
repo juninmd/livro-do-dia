@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { deliverPost } from "./deliver.ts";
+import { CAPTION_MAX, deliverPost, layoutPost } from "./deliver.ts";
 
 const post = {
   cover: "https://capa",
@@ -42,5 +42,28 @@ describe("deliverPost", () => {
     const r = recorder(true);
     expect(await deliverPost({ ...post, cover: "" }, r.send)).toBe(true);
     expect(r.sent).toEqual(["text:HEADER\n\nSECOES"]);
+  });
+});
+
+describe("layoutPost", () => {
+  test("post curto vai inteiro na legenda", () => {
+    const p = layoutPost("cabeçalho", "\n💥 gancho", "seções");
+    expect(p.caption).toBe("cabeçalho\n\n💥 gancho\n\nseções");
+    expect(p.rest).toBe("");
+  });
+
+  test("post longo: cabeçalho e gancho na legenda, seções na continuação", () => {
+    const sections = "s".repeat(2000);
+    const p = layoutPost("cabeçalho", "\n💥 gancho", sections);
+    expect(p.caption).toBe("cabeçalho\n\n💥 gancho");
+    expect(p.rest).toBe(sections);
+  });
+
+  test("gancho gigante desce para a continuação em vez de ser cortado", () => {
+    const tagline = `\n💥 ${"g".repeat(1100)}`;
+    const p = layoutPost("cabeçalho", tagline, "seções");
+    expect(p.caption).toBe("cabeçalho");
+    expect(p.rest).toBe(`${tagline.trim()}\n\nseções`);
+    expect(p.caption.length).toBeLessThanOrEqual(CAPTION_MAX);
   });
 });
