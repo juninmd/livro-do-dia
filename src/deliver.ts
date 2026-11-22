@@ -7,6 +7,22 @@ export interface Deliverable {
   rest: string;
 }
 
+/** Limite de legenda de foto no Telegram. */
+export const CAPTION_MAX = 1024;
+
+/**
+ * Divide o post entre legenda e continuação. Se nem o cabeçalho com o gancho
+ * cabe na legenda, o gancho desce para a continuação em vez de ser cortado.
+ */
+export function layoutPost(head: string, tagline: string, sections: string) {
+  const header = tagline ? `${head}\n${tagline}` : head;
+  const full = `${header}\n\n${sections}`;
+  if (full.length <= CAPTION_MAX) return { caption: full, full, rest: "" };
+  if (header.length <= CAPTION_MAX) return { caption: header, full, rest: sections };
+  const rest = tagline ? `${tagline.trim()}\n\n${sections}` : sections;
+  return { caption: head.slice(0, CAPTION_MAX), full, rest };
+}
+
 export interface Senders {
   photo: (url: string, caption: string) => Promise<boolean>;
   text: (text: string) => Promise<boolean>;
