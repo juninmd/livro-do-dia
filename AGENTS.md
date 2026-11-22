@@ -40,3 +40,15 @@ CI (`ci.yml`) runs typecheck, `biome check`, and tests.
 
 - `.env.example` sets `NODE_TLS_REJECT_UNAUTHORIZED` for the cluster's self-signed certificate. That disables TLS checks. Use it in development only, never in production.
 - The Telegram bot is the same one used by `evo-agent` (per `.env.example`). Changes to the bot affect both.
+
+<!-- base-actions-main-policy -->
+## GitHub Actions — padrão obrigatório (@main)
+
+- Referencie as actions internas sempre pelo branch, nunca por SHA:
+  - `uses: juninmd/base-actions/<action>@main`
+  - `uses: juninmd/base-actions/.github/workflows/<arquivo>.yml@main`
+- Não fixe `@<sha>` em `juninmd/base-actions`: a atualização é centralizada no
+  `main` e passa a valer no próximo run.
+- PRs cujos checks não iniciam por billing/spending limit são mesclados pelo bot central
+  `juninmd/base-actions/.github/workflows/auto-merge-billing-blocked.yml`.
+  Para impedir o merge automático de um PR, aplique a label `do-not-merge`.
